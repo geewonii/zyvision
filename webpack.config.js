@@ -1,39 +1,33 @@
-var webpack = require('webpack');
-var path = require("path");
-var HtmlwebpackPlugin = require('html-webpack-plugin');
-var extractTextPlugin = require('extract-text-webpack-plugin');
-var ROOT_PATH = path.resolve(__dirname);
-var SRC_PATH = path.resolve(ROOT_PATH, 'src');
-var DIST_PATH = path.resolve(ROOT_PATH, 'dist');
-var loaders = [
-		{
-	    loader: 'css-loader'
-	    // options: {
-	    //   modules: true
-	    // }
-		},
-		{
-	  	loader: 'autoprefixer-loader'
-		},
-		{
-	    loader: 'sass-loader'
+const webpack = require('webpack');
+const { resolve } = require('path');
+const HtmlwebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const ROOT_PATH = resolve(__dirname);
+const SRC_PATH = resolve(ROOT_PATH, 'src');
+const DIST_PATH = resolve(ROOT_PATH, 'dist');
+const loaders = [
+    {loader: 'css-loader'},
+    {
+		loader: 'postcss-loader',
+		options: {
+			sourceMap: true,
+			config: { path: 'postcss.config.js' }
 		}
-];
-var config = {
-	entry: {
-		main: SRC_PATH
 	},
+	{loader: 'sass-loader'}
+];
+const config = {
+	entry: { main: SRC_PATH },
 	output: {
-		path: DIST_PATH,
-		publicPath: './', //上线时记得改为 ‘./’
+    path: DIST_PATH,
+		publicPath: '/',  //静态资源目录
 		filename: '[name].bundle.[hash:8].js'
 	},
 	module: {
 		rules:[
 			{
 				test: /\.(scss|css)$/,
-				use: extractTextPlugin.extract({fallbackLoader: 'style-loader',loader: loaders}),
-				// use:[ 'style-loader','css-loader','sass-loader','autoprefixer-loader'],
+				use: ExtractTextPlugin.extract({fallbackLoader: 'style-loader', use: loaders}),
 				include: SRC_PATH
 			},
 			{
@@ -42,17 +36,15 @@ var config = {
 			},
 			{
 				test : /\.(ttf|eot|svg|woff(2))(\?[a-z0-9]+)?$/,
-    		use : ['file-loader?name=../font/[name][hash:6].[ext]']
+    		use : ['file-loader?name=font/[name][hash:6].[ext]']
 			},
 			{
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        loader: 'babel-loader',
-        include: SRC_PATH,
-        options: {
-            presets: ["es2015"]
-          }
-		    }
+				test: /\.(js|jsx)$/,
+				exclude: /node_modules/,
+				loader: 'babel-loader',
+				include: SRC_PATH,
+				options: { presets: ["env"] }
+			}
 		]
 	},
 	
@@ -61,7 +53,9 @@ var config = {
 	    contentBase: DIST_PATH,
 	    stats: 'errors-only',
 	    hot: true,
-	    inline: true
+			inline: true,
+			overlay: true,
+			compress: true
 	},
   
 	plugins: [
@@ -71,7 +65,7 @@ var config = {
 	      template: './src/Template/index.ejs',
 	      favicon: ""
 	    }),
-	    new extractTextPlugin("css/[name].min.css"),
+	    new ExtractTextPlugin("css/[name].min.css"),
 	    new webpack.HotModuleReplacementPlugin()
 	]
 }

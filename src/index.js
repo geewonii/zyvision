@@ -1,8 +1,7 @@
-import './sass/style.scss';
+import './scss/style.scss';
 
+import Main from './js/main';
+const main = new Main();
 
-import Index_module from './js/index_module';
-var index_module_obj =new Index_module();
-
-index_module_obj.init();
-index_module_obj.control();
+main.init();
+main.control();
